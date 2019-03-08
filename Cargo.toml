@@ -1,0 +1,12 @@
+[package]
+name = "exchange-rate"
+version = "0.1.0"
+authors = ["Tochukwu Nkemdilim <nkemdilimtochukwu@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+petgraph = "0.4.13"
+permutate = "0.3.2"
+chrono = { version = "0.4", features = ["serde"] }
+permutohedron = "0.2.4"
+itertools = "0.8.0"
