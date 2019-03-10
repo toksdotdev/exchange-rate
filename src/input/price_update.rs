@@ -1,14 +1,20 @@
 use crate::currency::{Currency, CurrencyParseError};
+use crate::exchange::Exchange;
+use crate::exchange_type::ExchangeType;
+use crate::exchange_type::ExchangeTypeParseError;
 use chrono::{prelude::*, ParseError};
+use rust_decimal::{Decimal, Error};
+use std::hash::Hash;
+use std::hash::Hasher;
+use std::str::FromStr;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Eq, Clone)]
 pub struct PriceUpdate {
     timestamp: NaiveDateTime,
-    exchange: String,
+    exchange: ExchangeType,
     source_currency: Currency,
     destination_currency: Currency,
-    forward_factor: f32,
-    backward_factor: f32,
+    src_to_dest_rate: Decimal,
 }
 
 #[derive(Debug)]
@@ -16,25 +22,26 @@ pub enum PriceUpdateParseError {
     IncompleteData,
     TimestampError(ParseError),
     InvalidFactor,
+    InvalidRate(Error),
     InvalidCurrency(CurrencyParseError),
+    InvalidExchangeType(ExchangeTypeParseError),
 }
 
 impl PriceUpdate {
     pub fn new(
         timestamp: NaiveDateTime,
-        exchange: &str,
+        exchange: ExchangeType,
         source_currency: Currency,
         destination_currency: Currency,
-        forward_factor: f32,
-        backward_factor: f32,
+        forward_factor: Decimal,
+        backward_factor: Decimal,
     ) -> Self {
         Self {
             timestamp,
-            exchange: exchange.to_string(),
+            exchange,
             source_currency,
             destination_currency,
-            forward_factor,
-            backward_factor,
+            src_to_dest_rate: forward_factor / backward_factor,
         }
     }
 
@@ -42,7 +49,7 @@ impl PriceUpdate {
         &self.timestamp
     }
 
-    pub fn exchange(&self) -> &str {
+    pub fn exchange(&self) -> &ExchangeType {
         &self.exchange
     }
 
@@ -53,12 +60,12 @@ impl PriceUpdate {
     pub fn destination_currency(&self) -> &Currency {
         &self.destination_currency
     }
-    pub fn forward_factor(&self) -> &f32 {
-        &self.forward_factor
+    pub fn forward_factor(&self) -> &Decimal {
+        &self.src_to_dest_rate
     }
-
-    pub fn backward_factor(&self) -> &f32 {
-        &self.backward_factor
+    pub fn backward_factor(&self) -> Decimal {
+        let a: Decimal = 1.into();
+        a / self.src_to_dest_rate
     }
 
     /// As an improvement, use serde serialize
@@ -69,14 +76,17 @@ impl PriceUpdate {
             return Err(PriceUpdateParseError::IncompleteData);
         }
 
-        Ok(Self {
-            timestamp: values.next().unwrap().parse()?,
-            exchange: values.next().unwrap().to_string(),
-            source_currency: values.next().unwrap().parse()?,
-            destination_currency: values.next().unwrap().parse()?,
-            forward_factor: values.next().unwrap().parse()?,
-            backward_factor: values.next().unwrap().parse()?,
-        })
+        let datetime =
+            NaiveDateTime::parse_from_str(values.next().unwrap(), "%Y-%m-%dT%H:%M:%S%z")?;
+
+        Ok(Self::new(
+            datetime,
+            values.next().unwrap().parse()?,
+            values.next().unwrap().parse()?,
+            values.next().unwrap().parse()?,
+            values.next().unwrap().parse()?,
+            values.next().unwrap().parse()?,
+        ))
     }
 }
 
@@ -98,13 +108,39 @@ impl From<CurrencyParseError> for PriceUpdateParseError {
     }
 }
 
-// impl Into<ExchangePrice> for PriceUpdate {
-//     fn into(self) -> ExchangePrice {
-//         ExchangePrice::new(
-//             self.timestamp,
-//             self.exchange,
-//             self.destination_currency,
-//             self.source_currency,
-//         )
-//     }
-// }
+impl From<ExchangeTypeParseError> for PriceUpdateParseError {
+    fn from(error: ExchangeTypeParseError) -> Self {
+        PriceUpdateParseError::InvalidExchangeType(error)
+    }
+}
+
+impl From<Error> for PriceUpdateParseError {
+    fn from(error: Error) -> Self {
+        PriceUpdateParseError::InvalidRate(error)
+    }
+}
+
+impl PartialEq for PriceUpdate {
+    fn eq(&self, other: &PriceUpdate) -> bool {
+        self.destination_currency == other.destination_currency
+            && self.exchange == other.exchange
+            && self.source_currency == other.source_currency
+    }
+}
+
+impl Hash for PriceUpdate {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.exchange.hash(state);
+        self.destination_currency.hash(state);
+        self.source_currency.hash(state);
+    }
+}
+
+impl From<&PriceUpdate> for (Exchange, Exchange) {
+    fn from(ex: &PriceUpdate) -> (Exchange, Exchange) {
+        (
+            Exchange::new(ex.exchange, ex.source_currency, ex.timestamp),
+            Exchange::new(ex.exchange, ex.destination_currency, ex.timestamp),
+        )
+    }
+}

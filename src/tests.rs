@@ -1,4 +1,6 @@
-use crate::prelude::{Currency, ExchangeRateRequest, PriceUpdate};
+use crate::prelude::{Currency, ExchangeRateRequest, ExchangeType, PriceUpdate, RateGraph};
+use rust_decimal::Decimal;
+use std::str::FromStr;
 
 #[test]
 fn parse_price_update() {
@@ -8,19 +10,19 @@ fn parse_price_update() {
     let result = vec![
         PriceUpdate::new(
             "2017-11-01T09:42:23+00:00".parse().unwrap(),
-            "KRAKEN",
+            ExchangeType::KRAKEN,
             Currency::BTC,
             Currency::USD,
-            1000.0,
-            0.0009,
+            Decimal::from_str("1000.0").unwrap(),
+            Decimal::from_str("0.0009").unwrap(),
         ),
         PriceUpdate::new(
             "2017-11-01T09:43:23+00:00".parse().unwrap(),
-            "GDAX",
+            ExchangeType::GDAX,
             Currency::BTC,
             Currency::USD,
-            1001.0,
-            0.0008,
+            Decimal::from_str("1001.0").unwrap(),
+            Decimal::from_str("0.0008").unwrap(),
         ),
     ];
 
@@ -36,15 +38,15 @@ fn parse_exchange_rate() {
 
     let result = vec![
         ExchangeRateRequest::new(
-            "KRAKEN".to_string(),
+            ExchangeType::KRAKEN,
             Currency::USD,
-            "GDAX".to_string(),
+            ExchangeType::GDAX,
             Currency::LTC,
         ),
         ExchangeRateRequest::new(
-            "GDAX".to_string(),
+            ExchangeType::GDAX,
             Currency::BTC,
-            "GDAX".to_string(),
+            ExchangeType::GDAX,
             Currency::LTC,
         ),
     ];
@@ -56,7 +58,27 @@ fn parse_exchange_rate() {
 
 #[test]
 fn test_generated_graph() {
-    unimplemented!();
+    let price_updates = vec![
+        PriceUpdate::new(
+            "2017-11-01T09:42:23+00:00".parse().unwrap(),
+            ExchangeType::KRAKEN,
+            Currency::BTC,
+            Currency::USD,
+            Decimal::from_str("1000.0").unwrap(),
+            Decimal::from_str("0.0009").unwrap(),
+        ),
+        PriceUpdate::new(
+            "2017-11-01T09:43:23+00:00".parse().unwrap(),
+            ExchangeType::GDAX,
+            Currency::BTC,
+            Currency::USD,
+            Decimal::from_str("1001.0").unwrap(),
+            Decimal::from_str("0.0008").unwrap(),
+        ),
+    ];
+
+    // let graph = RateGraph::from(price_updates);
+    // dbg!(graph);
 }
 
 #[test]
