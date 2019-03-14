@@ -24,7 +24,7 @@ fn price_updates() -> Vec<PriceUpdate> {
 }
 
 #[test]
-fn test_output() {
+fn output_is_correct() {
     let file = &read("tests/inputs/easy/integration_exchange_rate_request.txt").unwrap();
     let rate_requests = String::from_utf8_lossy(file);
     let file = &read("tests/outputs/easy/output.txt").unwrap();
