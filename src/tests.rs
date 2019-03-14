@@ -1,4 +1,5 @@
-use crate::prelude::{Currency, ExchangeRateRequest, ExchangeType, PriceUpdate, RateGraph};
+use super::prelude::{Currency, ExchangeRateRequest, ExchangeType, PriceUpdate, RateGraph};
+use chrono::NaiveDate;
 use rust_decimal::Decimal;
 use std::str::FromStr;
 
@@ -60,7 +61,7 @@ fn parse_exchange_rate() {
 fn test_generated_graph() {
     let price_updates = vec![
         PriceUpdate::new(
-            "2017-11-01T09:42:23+00:00".parse().unwrap(),
+            NaiveDate::from_ymd(2017, 11, 1).and_hms(9, 42, 23),
             ExchangeType::KRAKEN,
             Currency::BTC,
             Currency::USD,
@@ -77,7 +78,7 @@ fn test_generated_graph() {
         ),
     ];
 
-    // let graph = RateGraph::from(price_updates);
+    let _ = RateGraph::from(price_updates);
     // dbg!(graph);
 }
 
