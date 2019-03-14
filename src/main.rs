@@ -34,6 +34,21 @@ fn main() {
             Currency::USD,
         ),
     ];
-    let graph = RateGraph::from(price_updates);
-    dbg!(&graph.full_path(&result[1]));
+
+    let rate_graph = RateGraph::from(price_updates);
+    let mut out = "".to_string();
+
+    for (index, rqst) in result.iter().enumerate() {
+        let (full_path, cost) = rate_graph.full_path(&rqst).unwrap();
+
+        if index == result.len() - 1 {
+            out = format!("{}{}", out, output(&full_path, cost));
+        } else if index == 0 {
+            out = format!("{}{}\n", out, output(&full_path, cost));
+        } else {
+            out = format!("{}\n{}", out, output(&full_path, cost));
+        }
+    }
+
+    println!("{}", out);
 }

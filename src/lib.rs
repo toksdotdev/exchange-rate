@@ -12,6 +12,7 @@ pub mod prelude {
     pub use super::{
         exchange::{Currency, ExchangeType, RateGraph},
         input::{ExchangeRateRequest, PriceUpdate},
+        utils::output,
     };
     pub use chrono::NaiveDate;
     pub use rust_decimal::Decimal;
