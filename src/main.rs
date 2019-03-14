@@ -1,28 +1,39 @@
-//! Goals:
-//! - parse input:  price updates
-//! - parse input: exchange rate requests
-//! - generate the graph
-//! - predict the shortest path
-//! - display the output
-//!
-//!  TEST CASES
-//!  - check for different unsupported currency
-
-mod currency;
-mod exchange;
-mod input;
-// mod rate_graph;
-mod tests;
-
-mod prelude {
-    pub use super::currency::Currency;
-    pub use super::input::ExchangeRateRequest;
-    pub use super::input::PriceUpdate;
-}
+use exchange_rate::prelude::*;
 
 fn main() {
-    use itertools;
+    let price_updates = vec![
+        PriceUpdate::new(
+            NaiveDate::from_ymd(2015, 9, 5).and_hms(23, 56, 4),
+            ExchangeType::KRAKEN,
+            Currency::BTC,
+            Currency::USD,
+            Decimal::from_str("1.0").unwrap(),
+            Decimal::from_str("0.0000009").unwrap(),
+        ),
+        PriceUpdate::new(
+            NaiveDate::from_ymd(2015, 9, 5).and_hms(23, 56, 4),
+            ExchangeType::GDAX,
+            Currency::BTC,
+            Currency::USD,
+            Decimal::from_str("1001.0").unwrap(),
+            Decimal::from_str("0.0008").unwrap(),
+        ),
+    ];
 
-    let mut data = [1, 2, 3, 4, 5, 6];
-    data.iter().combination(2);
+    let result = vec![
+        ExchangeRateRequest::new(
+            ExchangeType::KRAKEN,
+            Currency::USD,
+            ExchangeType::GDAX,
+            Currency::BTC,
+        ),
+        ExchangeRateRequest::new(
+            ExchangeType::GDAX,
+            Currency::BTC,
+            ExchangeType::KRAKEN,
+            Currency::USD,
+        ),
+    ];
+    let graph = RateGraph::from(price_updates);
+    dbg!(&graph.full_path(&result[1]));
 }
