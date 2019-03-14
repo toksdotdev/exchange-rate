@@ -90,7 +90,7 @@ impl FromStr for PriceUpdate {
     ///
     /// Example:
     ///
-    /// ```
+    ///
     /// use exchange_rate::prelude::*;
     ///
     /// let sliced_update = "2017-11-01T09:42:23+00:00 KRAKEN BTC USD 1000.0 0.0009";
@@ -105,7 +105,6 @@ impl FromStr for PriceUpdate {
     ///
     /// assert_eq!(PriceUpdate::from_str(sliced_update), output);
     ///
-    /// ```
     fn from_str(data: &str) -> Result<Self, Self::Err> {
         // Todo: As an improvement, use `serde` for serialization.
         let mut values = data.split_whitespace();

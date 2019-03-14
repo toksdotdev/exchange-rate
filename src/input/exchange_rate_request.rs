@@ -89,7 +89,7 @@ impl FromStr for ExchangeRateRequest {
     ///
     /// Example:
     ///
-    /// ```
+    ///
     /// use exchange_rate::prelude::ExchangeRateRequest;
     ///
     /// let sliced_request = "EXCHANGE_RATE_REQUEST KRAKEN USD GDAX LTC";
@@ -102,7 +102,7 @@ impl FromStr for ExchangeRateRequest {
     ///
     /// assert_eq!(ExchangeRateRequest::from_str(sliced_request), output);
     ///
-    /// ```
+    ///
     fn from_str(data: &str) -> Result<Self, Self::Err> {
         let mut values = data.split_whitespace();
 

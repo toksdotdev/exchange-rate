@@ -1,8 +1,7 @@
-use crate::exchange::Path;
-use crate::utils::map_utils::update_with_recent;
 use crate::{
-    exchange::{Currency, ExchangeVertex, ExchangeVertexPair, FullPath},
+    exchange::{Currency, ExchangeVertex, ExchangeVertexPair, FullPath, Path, PathCost},
     input::{ExchangeRateRequest, PriceUpdate},
+    utils::map_utils::update_with_recent,
 };
 use chrono::NaiveDateTime;
 use itertools::Itertools;
@@ -86,11 +85,11 @@ impl RateGraph {
     pub fn full_path(
         &self,
         request: &ExchangeRateRequest,
-    ) -> Result<FullPath<ExchangeVertex>, RateGraphError> {
+    ) -> Result<(FullPath<ExchangeVertex>, PathCost<Decimal>), RateGraphError> {
         let (u, v) = ExchangeVertexPair::from(request);
         self.path
             .full_path(u, v)
-            .map_err(|_| RateGraphError::NoEdgesBetweenNodes(u, v))
+            .ok_or_else(|| RateGraphError::NoEdgesBetweenNodes(u, v))
     }
 
     /// Insert a given collection of price updates into the a rate map.

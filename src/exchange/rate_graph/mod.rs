@@ -1,7 +1,5 @@
+mod exchange_vertex;
 mod graph;
 mod path;
-mod vertex;
 
-pub use self::graph::*;
-pub use self::path::*;
-pub use self::vertex::*;
+pub use self::{exchange_vertex::*, graph::*, path::*};

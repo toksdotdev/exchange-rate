@@ -1,11 +1,9 @@
-use petgraph::visit::IntoEdgeReferences;
-use petgraph::{graphmap::NodeTrait, prelude::DiGraphMap};
-use std::collections::HashSet;
-use std::fmt::Debug;
-use std::iter::FromIterator;
-use std::ops::Mul;
+use petgraph::{graphmap::NodeTrait, prelude::DiGraphMap, visit::IntoEdgeReferences};
+use std::ops::Add;
+use std::{fmt::Debug, ops::Mul};
 
-pub type FullPath<T> = HashSet<T>;
+pub type FullPath<T> = Vec<T>;
+pub type PathCost<T> = T;
 
 #[derive(Debug)]
 pub struct Path<V, E>
@@ -20,24 +18,26 @@ where
 impl<V, E> Path<V, E>
 where
     V: NodeTrait + Debug,
-    E: NodeTrait + Debug,
+    E: NodeTrait + Debug + From<i32> + Copy + Add<Output = E>,
 {
     /// Gets the full most optimal path for moving from a given source node (`u`)
     /// to a given destination node (`v`).
-    pub fn full_path(&self, mut u: V, v: V) -> Result<FullPath<V>, ()> {
+    pub fn full_path(&self, mut u: V, v: V) -> Option<(FullPath<V>, PathCost<E>)> {
         if !self.next.contains_edge(u, v) {
-            return Err(());
+            return None;
         }
 
-        let mut path = FullPath::from_iter(vec![u]);
+        let mut path = vec![u];
+        let mut path_cost: E = 0.into();
         while u != v {
             if let Some(node) = self.next.edge_weight(u, v).unwrap() {
+                path_cost = path_cost + *self.rate.edge_weight(u, v).unwrap();
                 u = *node;
-                path.insert(u);
+                path.push(u);
             }
         }
 
-        Ok(path)
+        Some((path, path_cost))
     }
 
     /// Populate the path graph with default values, by using the

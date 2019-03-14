@@ -1,6 +1,5 @@
 use chrono::Datelike;
-use std::collections::HashMap;
-use std::hash::Hash;
+use std::{collections::HashMap, hash::Hash};
 
 /// Update the times stamp value of a hashmap with the latest time.
 /// If the key is missing, the key and the value gets added into the provided hashmap.

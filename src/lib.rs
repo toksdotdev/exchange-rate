@@ -1,6 +1,5 @@
-mod exchange;
+pub mod exchange;
 mod input;
-mod tests;
 mod utils;
 
 pub mod prelude {
@@ -10,9 +9,10 @@ pub mod prelude {
     //! - Determining a sequence of trades and transfers across exchanges
     //! to convert the cryptocurrency to fiat currency with a suitable exchange rate.
     //! - Providing the best possible exchange rate to our customers.
-    pub use super::exchange::{Currency, ExchangeType, RateGraph};
-    pub use super::input::ExchangeRateRequest;
-    pub use super::input::PriceUpdate;
+    pub use super::{
+        exchange::{Currency, ExchangeType, RateGraph},
+        input::{ExchangeRateRequest, PriceUpdate},
+    };
     pub use chrono::NaiveDate;
     pub use rust_decimal::Decimal;
     pub use std::str::FromStr;
